@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ทะเบียนพนักงาน & Morning talk (Supabase)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--ink:#1c2733;--mute:#6b7785;--line:#e3e8ee;--acc:#1f6f5c;--accink:#fff;--danger:#b3372f;--head:#eef3f1;--soft:#e4f1ed;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12171c;--card:#1b222a;--ink:#e8edf2;--mute:#9aa7b4;--line:#2c3641;--acc:#4cbfa3;--accink:#0c1a16;--danger:#ff8b82;--head:#222c35;--soft:#20342f}}
+:root[data-theme="dark"]{--bg:#12171c;--card:#1b222a;--ink:#e8edf2;--mute:#9aa7b4;--line:#2c3641;--acc:#4cbfa3;--accink:#0c1a16;--danger:#ff8b82;--head:#222c35;--soft:#20342f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Thai",Sarabun,Tahoma,sans-serif;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.4rem;margin:0}
+.sub{color:var(--mute);font-size:.9rem;margin:2px 0 14px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.tab{background:none;color:var(--mute);border:0;border-bottom:3px solid transparent;border-radius:0;padding:10px 16px;font-weight:500}
+.tab.on{color:var(--acc);border-bottom-color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:760px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:.85rem;color:var(--mute);margin-bottom:4px}
+input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+input:focus,select:focus{outline:2px solid var(--acc);outline-offset:1px}
+input[type=checkbox]{width:22px;height:22px;accent-color:var(--acc);padding:0}
+button{font:inherit;cursor:pointer;border-radius:8px;border:0;padding:10px 18px;background:var(--acc);color:var(--accink);font-weight:500}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--danger);padding:4px 8px;border:1px solid var(--line)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.seg button{background:var(--card);color:var(--ink);border-radius:0;padding:9px 16px}
+.seg button.on{background:var(--acc);color:var(--accink)}
+.row{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:12px}
+.msg{font-size:.85rem;color:var(--mute)}
+.bar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap}
+.bar .f{display:flex;gap:10px;flex-wrap:wrap}
+.bar input,.bar select{width:auto;min-width:150px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{background:var(--head);font-size:.85rem;color:var(--mute);font-weight:500}
+td.n{width:60px;color:var(--mute)}
+.empty{text-align:center;color:var(--mute);padding:24px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.stat{background:var(--soft);border-radius:10px;padding:8px 14px;font-size:.9rem}
+.stat b{font-size:1.15rem}
+.hide{display:none}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:10}
+.modal.hide{display:none}
+.mbox{background:var(--card);border-radius:12px;padding:16px;width:100%;max-width:440px}
+#pad{width:100%;height:auto;aspect-ratio:5/2;border:1px dashed var(--mute);border-radius:8px;background:#fff;touch-action:none;display:block;margin:8px 0}
+.sig{height:36px;background:#fff;border:1px solid var(--line);border-radius:6px;vertical-align:middle;margin-right:8px}
+input.rm{min-width:160px;padding:6px 8px}
+button.ghost2{background:transparent;color:var(--ink);border:1px solid var(--line);padding:4px 10px}
+td button+button{margin-left:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ทะเบียนพนักงาน & Morning talk</h1>
+  <p class="sub">แผนกบุคคลและธุรการ · <span id="conn">กำลังเชื่อมต่อ Supabase…</span> · <button class="ghost2" id="adm">โหมดผู้ดูแล</button></p>
+
+  <div class="tabs">
+    <button class="tab on" data-tab="reg">ทะเบียนรายชื่อพนักงาน</button>
+    <button class="tab" data-tab="mt">รายชื่อ Morning talk ตอนเช้า</button>
+    <button class="tab" data-tab="log">บันทึกข้อมูล</button>
+  </div>
+
+  <section id="reg">
+    <div class="seg" id="seg">
+      <button data-type="PMG" class="on">พนักงาน PMG</button>
+      <button data-type="SUB">พนักงาน SUB PMG</button>
+    </div>
+    <div class="card">
+      <div class="grid">
+        <div><label for="eid">รหัสพนักงาน</label><input id="eid" autocomplete="off"></div>
+        <div><label for="first">ชื่อ</label><input id="first" autocomplete="off"></div>
+        <div><label for="last">นามสกุล</label><input id="last" autocomplete="off"></div>
+        <div><label for="nick">ชื่อเล่น</label><input id="nick" autocomplete="off"></div>
+        <div><label for="code">รหัสแผนก</label><input id="code" autocomplete="off"></div>
+        <div><label for="dept">แผนก</label><select id="dept"></select></div>
+      </div>
+      <div class="row"><span class="msg" id="msg"></span><button id="add">บันทึกรายชื่อ</button></div>
+    </div>
+    <div class="card">
+      <div class="bar">
+        <strong id="count"></strong>
+        <input id="q" placeholder="ค้นหารหัสพนักงาน ชื่อ ชื่อเล่น หรือแผนก">
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th>ลำดับ</th><th>รหัสพนักงาน</th><th>ชื่อ</th><th>นามสกุล</th><th>ชื่อเล่น</th><th>รหัสแผนก</th><th>แผนก</th><th></th></tr></thead>
+        <tbody id="body"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="mt" class="hide">
+    <div class="card">
+      <div class="bar">
+        <div class="f">
+          <div><label for="date">วันที่</label><input type="date" id="date"></div>
+          <div><label for="mq">ค้นหา</label><input id="mq" placeholder="รหัสพนักงาน ชื่อ หรือชื่อเล่น"></div>
+          <div><label for="mdept">แผนก</label><select id="mdept"></select></div>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+      <span class="msg" id="mmsg"></span>
+      <div class="tw"><table>
+        <thead><tr><th>ลำดับ</th><th>รหัสพนักงาน</th><th>ชื่อ-นามสกุล</th><th>ชื่อเล่น</th><th>ประเภท</th><th>แผนก</th><th>ลายเซ็น</th><th>หมายเหตุ</th></tr></thead>
+        <tbody id="mbody"></tbody>
+      </table></div>
+    </div>
+  </section>
+  <section id="log" class="hide">
+    <div class="card">
+      <div class="bar"><div class="f">
+        <div><label for="lfrom">ตั้งแต่วันที่ (ว่าง = ทุกวัน)</label><input type="date" id="lfrom"></div>
+        <div><label for="lto">ถึงวันที่</label><input type="date" id="lto"></div>
+        <div><label for="ltype">ประเภท</label><select id="ltype"><option value="">ทั้งหมด</option><option value="PMG">พนักงาน PMG</option><option value="SUB">พนักงาน SUB PMG</option></select></div>
+        <div><label for="ldept">แผนก</label><select id="ldept"></select></div>
+        <div><label for="lq">ค้นหา</label><input id="lq" placeholder="รหัสพนักงาน ชื่อ หรือชื่อเล่น"></div>
+      </div></div>
+      <span class="msg" id="lmsg"></span>
+      <p><strong>สรุปรายวัน</strong></p>
+      <div class="tw"><table>
+        <thead><tr><th>วันที่</th><th>เซ็นชื่อทั้งหมด</th><th>PMG</th><th>SUB PMG</th><th>หมายเหตุ</th><th></th></tr></thead>
+        <tbody id="lsum"></tbody>
+      </table></div>
+      <p><strong>รายละเอียด</strong></p>
+      <div class="tw"><table>
+        <thead><tr><th>วันที่</th><th>รหัสพนักงาน</th><th>ชื่อ-นามสกุล</th><th>ชื่อเล่น</th><th>ประเภท</th><th>แผนก</th><th>สถานะ</th><th>เวลา</th><th>หมายเหตุ</th></tr></thead>
+        <tbody id="ldet"></tbody>
+      </table></div>
+    </div>
+  </section>
+</div>
+<div id="sigm" class="modal hide"><div class="mbox">
+  <strong id="sigt"></strong>
+  <canvas id="pad" width="600" height="240"></canvas>
+  <span class="msg">เซ็นชื่อในกรอบด้านบน</span>
+  <div class="row"><button class="ghost2" id="sclear">ล้าง</button><span><button class="ghost2" id="scancel">ยกเลิก</button> <button id="sok">ยืนยัน</button></span></div>
+  <span class="msg" id="smsg"></span>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ===== ตั้งค่าการเชื่อมต่อ Supabase (แก้ได้ที่นี่ที่เดียว) ===== */
+window.APP_CONFIG={
+  SUPABASE_URL:"https://ebaxdvdsibifqplqsvov.supabase.co",
+  SUPABASE_ANON_KEY:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYXhkdmRzaWJpZnFwbHFzdm92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0Mjk3MjQsImV4cCI6MjEwNzAwNTcyNH0.0ZZzHCLggK328ci3gMVUk1E0P4ZWwVuV4KMALdIqoiw",
+  TABLE_ATTENDANCE:"Morning talk",
+  TABLE_STAFF:"staff",
+  ADMIN_PIN:"1234"   /* รหัสโหมดผู้ดูแล (ป้องกันเบื้องต้นฝั่งหน้าเว็บเท่านั้น) — ควรเปลี่ยน */
+};
+</script>
+<script>
+(function(){
+  const $=i=>document.getElementById(i), C=window.APP_CONFIG;
+  const DEPTS=[{no:"001",abbr:"MM",name:"สำนักบริหาร"},{no:"003",abbr:"ACC",name:"บัญชี"},{no:"004",abbr:"HR",name:"บุคคลและธุรการ"},{no:"005",abbr:"IT",name:"สารสนเทศ"},{no:"006",abbr:"PU",name:"จัดซื้อ"},{no:"007",abbr:"MS",name:"ขาย"},{no:"008",abbr:"TD",name:"การตลาด"},{no:"009",abbr:"PD",name:"ผลิต"},{no:"010",abbr:"EM",name:"วิศวกรรมและซ่อมบำรุง"},{no:"011",abbr:"WH",name:"คลังสินค้า"},{no:"012",abbr:"TS",name:"จัดส่ง"}];
+  const TYPES={PMG:"พนักงาน PMG",SUB:"พนักงาน SUB PMG"};
+  let sb=null,staff=[],att={},rem={},atMap={},log=[],curType="PMG",canEdit=false;
+
+  const deptBy=n=>DEPTS.find(d=>d.name===n)||null;
+  const today=()=>{const d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)};
+  const opt=(sel,v,t)=>{const o=document.createElement("option");o.value=v;o.textContent=t;sel.appendChild(o)};
+  const td=(tr,v,cls)=>{const c=document.createElement("td");if(cls)c.className=cls;c.textContent=v==null?"":v;tr.appendChild(c);return c};
+  const empty=(body,cols,t)=>{const tr=document.createElement("tr"),c=document.createElement("td");c.colSpan=cols;c.className="empty";c.textContent=t;tr.appendChild(c);body.appendChild(tr)};
+  const byTime=(a,b)=>String(a.created_at||"").localeCompare(String(b.created_at||""));
+  const say=t=>{$("msg").textContent=t||""};
+  const fmtD=d=>{try{return new Date(d+"T00:00:00").toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"numeric"})}catch(e){return d}};
+  const fmtT=t=>{try{return t?new Date(t).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}):""}catch(e){return""}};
+  function fail(err,where){
+    console.error(err);
+    let m=(err&&err.message)||"เกิดข้อผิดพลาด";
+    if(err&&err.code==="42P01")m="ยังไม่พบตารางในฐานข้อมูล — รันไฟล์ supabase-setup.sql ก่อน";
+    else if(err&&(err.code==="42501"||/row-level security/i.test(m)))m="ถูกปฏิเสธโดย RLS — ตรวจนโยบายสิทธิ์ใน supabase-setup.sql";
+    else if(err&&err.code==="PGRST204"||/column/i.test(m))m+=" (โครงสร้างคอลัมน์ไม่ตรง — ดู supabase-setup.sql)";
+    $("conn").textContent="เชื่อมต่อไม่สำเร็จ";(where==="mt"?$("mmsg"):$("msg")).textContent=m;
+  }
+
+  /* dropdowns / defaults */
+  opt($("dept"),"","— เลือกแผนก —");opt($("mdept"),"","ทุกแผนก");opt($("ldept"),"","ทุกแผนก");
+  DEPTS.forEach(d=>{opt($("dept"),d.name,d.no+" "+d.abbr+" · "+d.name);opt($("mdept"),d.name,d.name);opt($("ldept"),d.name,d.name)});
+  $("code").readOnly=true;$("code").placeholder="เลือกแผนกแล้วกรอกให้อัตโนมัติ";
+  $("dept").onchange=()=>{const d=deptBy($("dept").value);$("code").value=d?d.no:""};
+  $("date").value=today();
+
+  /* tabs */
+  document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===b));
+    ["reg","mt","log"].forEach(t=>$(t).classList.toggle("hide",b.dataset.tab!==t));
+  });
+  document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{curType=b.dataset.type;renderReg()});
+
+  /* admin mode (client-side only) */
+  $("adm").onclick=()=>{
+    if(canEdit){canEdit=false}
+    else{const p=prompt("รหัสผู้ดูแล");if(p===null)return;if(p!==C.ADMIN_PIN){alert("รหัสไม่ถูกต้อง");return}canEdit=true}
+    $("adm").textContent=canEdit?"ออกจากโหมดผู้ดูแล":"โหมดผู้ดูแล";renderAll();
+  };
+
+  /* ---------- data access ---------- */
+  async function loadStaff(){
+    const {data,error}=await sb.from(C.TABLE_STAFF).select("*").order("created_at",{ascending:true});
+    if(error)return fail(error);
+    staff=(data||[]).map(r=>Object.assign(r,{code:r.dept_no}));
+    $("conn").textContent="เชื่อมต่อ Supabase แล้ว";renderReg();renderMT();
+  }
+  async function loadDay(){
+    const d=$("date").value||today();
+    const {data,error}=await sb.from(C.TABLE_ATTENDANCE).select("staff_id,signature,remark,signed_at").eq("date",d);
+    if(error)return fail(error,"mt");
+    att={};rem={};atMap={};
+    (data||[]).forEach(o=>{if(!o.staff_id)return;if(o.signature)att[o.staff_id]=o.signature;if(o.remark)rem[o.staff_id]=o.remark;atMap[o.staff_id]=o.signed_at});
+    renderMT();
+  }
+  async function loadLog(){
+    let q=sb.from(C.TABLE_ATTENDANCE).select("date,staff_id,eid,name,nick,type,dept,abbr,signed,remark,signed_at");
+    if($("lfrom").value)q=q.gte("date",$("lfrom").value);
+    const {data,error}=await q.order("date",{ascending:false}).limit(3000);
+    if(error){$("lmsg").textContent=error.message;return}
+    log=(data||[]).map(x=>Object.assign(x,{at:x.signed_at}));renderLog();
+    if(log.length>=3000)$("lmsg").textContent+=" (โหลด 3,000 รายการล่าสุด — ระบุช่วงวันที่เพื่อดูส่วนอื่น)";
+  }
+  const refreshAll=()=>Promise.all([loadStaff(),loadDay(),loadLog()]);
+
+  async function addStaff(){
+    const dd=deptBy($("dept").value);
+    const rec={type:curType,eid:$("eid").value.trim(),first:$("first").value.trim(),last:$("last").value.trim(),nick:$("nick").value.trim(),dept_no:$("code").value.trim(),abbr:dd?dd.abbr:"",dept:$("dept").value};
+    if(!rec.eid||!rec.first||!rec.last||!rec.dept_no||!rec.dept){say("กรุณากรอก รหัสพนักงาน ชื่อ นามสกุล และเลือกแผนก (ชื่อเล่นเว้นว่างได้)");return}
+    const {error}=await sb.from(C.TABLE_STAFF).insert(rec);
+    if(error)return fail(error);
+    ["eid","first","last","nick","code"].forEach(i=>$(i).value="");$("dept").value="";say("บันทึกแล้ว");$("eid").focus();loadStaff();
+  }
+  async function removeStaff(id){
+    const {error}=await sb.from(C.TABLE_STAFF).delete().eq("id",id);
+    if(error)return fail(error);loadStaff();
+  }
+  async function writeRec(id,sig,remark,signedAt){
+    const d=$("date").value,r=staff.find(x=>x.id===id)||{};
+    if(!sig&&!remark){
+      const {error}=await sb.from(C.TABLE_ATTENDANCE).delete().eq("date",d).eq("staff_id",id);
+      if(error)return fail(error,"mt");
+    }else{
+      const row={date:d,staff_id:id,eid:r.eid||"",name:((r.first||"")+" "+(r.last||"")).trim(),nick:r.nick||"",type:r.type||"",dept:r.dept||"",abbr:r.abbr||"",signed:!!sig,signature:sig||null,remark:remark||null,signed_at:sig?(signedAt||new Date().toISOString()):null};
+      const {error}=await sb.from(C.TABLE_ATTENDANCE).upsert(row,{onConflict:"date,staff_id"});
+      if(error)return fail(error,"mt");
+    }
+    $("mmsg").textContent="";await Promise.all([loadDay(),loadLog()]);
+  }
+  const saveSig=(id,data)=>writeRec(id,data,rem[id]||"",new Date().toISOString());
+  const clearSig=id=>writeRec(id,"",rem[id]||"",null);
+  const saveRemark=(id,t)=>writeRec(id,att[id]||"",t,atMap[id]||null);
+
+  /* ---------- registry ---------- */
+  function renderReg(){
+    document.querySelectorAll("#seg button").forEach(b=>{
+      const n=staff.filter(s=>s.type===b.dataset.type).length;
+      b.textContent=TYPES[b.dataset.type]+" ("+n+")";b.classList.toggle("on",b.dataset.type===curType);
+    });
+    const list=staff.filter(s=>s.type===curType);
+    $("count").textContent=TYPES[curType]+" ทั้งหมด "+list.length+" คน";
+    const q=$("q").value.trim().toLowerCase(),body=$("body");body.textContent="";let shown=0;
+    list.forEach((r,i)=>{
+      if(q&&[r.eid,r.first,r.last,r.nick,r.code,r.abbr,r.dept].join(" ").toLowerCase().indexOf(q)<0)return;shown++;
+      const tr=document.createElement("tr");
+      td(tr,i+1,"n");td(tr,r.eid);td(tr,r.first);td(tr,r.last);td(tr,r.nick);td(tr,r.code+(r.abbr?" "+r.abbr:""));td(tr,r.dept);
+      const c=td(tr,"");
+      if(canEdit){const b=document.createElement("button");b.className="ghost";b.textContent="ลบ";
+        b.onclick=()=>{if(confirm("ลบ "+r.first+" "+r.last+" ออกจากรายชื่อ?"))removeStaff(r.id)};c.appendChild(b)}
+      body.appendChild(tr);
+    });
+    if(!shown)empty(body,8,list.length?"ไม่พบรายชื่อที่ค้นหา":"ยังไม่มีรายชื่อ เริ่มบันทึกได้เลย");
+  }
+  $("add").onclick=addStaff;$("q").oninput=renderReg;
+  ["eid","first","last","nick","code"].forEach(i=>$(i).addEventListener("keydown",e=>{if(e.key==="Enter")addStaff()}));
+
+  /* ---------- Morning talk ---------- */
+  function renderMT(){
+    if(document.activeElement&&document.activeElement.className==="rm")return;
+    const all=staff.slice().sort((a,b)=>a.type===b.type?byTime(a,b):(a.type==="PMG"?-1:1));
+    const st=$("stats");st.textContent="";
+    const stat=(label,list)=>{const p=list.filter(s=>att[s.id]).length;const d=document.createElement("div");d.className="stat";
+      d.appendChild(document.createTextNode(label+" "));const b=document.createElement("b");b.textContent=p+" / "+list.length;d.appendChild(b);st.appendChild(d)};
+    stat("เซ็นชื่อแล้ว",all);stat("PMG",all.filter(s=>s.type==="PMG"));stat("SUB PMG",all.filter(s=>s.type==="SUB"));
+    const q=$("mq").value.trim().toLowerCase(),dp=$("mdept").value,body=$("mbody");body.textContent="";let shown=0;
+    all.forEach((r,i)=>{
+      if(dp&&r.dept!==dp)return;
+      if(q&&[r.eid,r.first,r.last,r.nick,r.code].join(" ").toLowerCase().indexOf(q)<0)return;shown++;
+      const tr=document.createElement("tr");
+      td(tr,i+1,"n");td(tr,r.eid);td(tr,r.first+" "+r.last);td(tr,r.nick);td(tr,TYPES[r.type]);td(tr,r.dept);
+      const c=td(tr,""),v=att[r.id];
+      if(v){const im=document.createElement("img");im.src=v;im.className="sig";im.alt="ลายเซ็น "+r.first;c.appendChild(im)}
+      const sb1=document.createElement("button");sb1.className="ghost2";sb1.textContent=v?"เซ็นใหม่":"เซ็นชื่อ";sb1.onclick=()=>openSig(r);c.appendChild(sb1);
+      if(v&&canEdit){const xb=document.createElement("button");xb.className="ghost";xb.textContent="ลบ";xb.onclick=()=>{if(confirm("ลบลายเซ็นของ "+r.first+"?"))clearSig(r.id)};c.appendChild(xb)}
+      const rc=td(tr,""),ri=document.createElement("input");ri.className="rm";ri.value=rem[r.id]||"";ri.placeholder="หมายเหตุ";
+      ri.onkeydown=e=>{if(e.key==="Enter")ri.blur()};ri.onchange=()=>saveRemark(r.id,ri.value.trim());rc.appendChild(ri);
+      body.appendChild(tr);
+    });
+    if(!shown)empty(body,8,all.length?"ไม่พบรายชื่อที่ค้นหา":"ยังไม่มีรายชื่อพนักงาน — เพิ่มได้ที่แท็บทะเบียนรายชื่อ");
+  }
+  $("date").onchange=loadDay;$("mq").oninput=renderMT;$("mdept").onchange=renderMT;
+
+  /* signature pad */
+  const pad=$("pad"),ctx=pad.getContext("2d");let drawing=false,drawn=false,sigFor=null;
+  function blank(){ctx.fillStyle="#fff";ctx.fillRect(0,0,pad.width,pad.height);ctx.strokeStyle="#111";ctx.lineWidth=3;ctx.lineCap="round";ctx.lineJoin="round";drawn=false}
+  const pt=e=>{const r=pad.getBoundingClientRect();return{x:(e.clientX-r.left)*pad.width/r.width,y:(e.clientY-r.top)*pad.height/r.height}};
+  pad.addEventListener("pointerdown",e=>{e.preventDefault();drawing=true;try{pad.setPointerCapture(e.pointerId)}catch(x){}const p=pt(e);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+.1,p.y+.1);ctx.stroke();drawn=true});
+  pad.addEventListener("pointermove",e=>{if(!drawing)return;const p=pt(e);ctx.lineTo(p.x,p.y);ctx.stroke()});
+  ["pointerup","pointercancel"].forEach(ev=>pad.addEventListener(ev,()=>{drawing=false}));
+  function openSig(r){sigFor=r;$("sigt").textContent=r.first+" "+r.last+(r.nick?" ("+r.nick+")":"");$("smsg").textContent="";blank();$("sigm").classList.remove("hide")}
+  function closeSig(){$("sigm").classList.add("hide");sigFor=null}
+  $("sclear").onclick=blank;$("scancel").onclick=closeSig;
+  $("sok").onclick=()=>{if(!drawn){$("smsg").textContent="กรุณาเซ็นชื่อก่อนยืนยัน";return}saveSig(sigFor.id,pad.toDataURL("image/png"));closeSig()};
+
+  /* ---------- history log ---------- */
+  function renderLog(){
+    const to=$("lto").value,ty=$("ltype").value,dp=$("ldept").value,q=$("lq").value.trim().toLowerCase();
+    const list=log.filter(x=>{
+      if(to&&x.date>to)return false;if(ty&&x.type!==ty)return false;if(dp&&x.dept!==dp)return false;
+      return !q||[x.eid,x.name,x.nick,x.abbr,x.remark].join(" ").toLowerCase().indexOf(q)>=0});
+    const days={};list.forEach(x=>{const o=days[x.date]||(days[x.date]={t:0,PMG:0,SUB:0,rm:0});if(x.remark)o.rm++;if(x.signed!==false){o.t++;if(x.type==="PMG"||x.type==="SUB")o[x.type]++}});
+    const keys=Object.keys(days).sort().reverse(),sbd=$("lsum");sbd.textContent="";
+    keys.forEach(k=>{const o=days[k],tr=document.createElement("tr");
+      td(tr,fmtD(k));td(tr,o.t);td(tr,o.PMG);td(tr,o.SUB);td(tr,o.rm);
+      const c=td(tr,"");const b=document.createElement("button");b.className="ghost2";b.textContent="ดูใบเซ็นชื่อ";
+      b.onclick=()=>{$("date").value=k;loadDay();document.querySelector('.tab[data-tab="mt"]').click()};c.appendChild(b);sbd.appendChild(tr)});
+    if(!keys.length)empty(sbd,6,"ยังไม่มีบันทึกในช่วงที่เลือก");
+    list.sort((a,b)=>a.date===b.date?String(a.eid).localeCompare(String(b.eid)):(a.date<b.date?1:-1));
+    const dt=$("ldet");dt.textContent="";
+    list.slice(0,500).forEach(x=>{const tr=document.createElement("tr");
+      td(tr,fmtD(x.date));td(tr,x.eid);td(tr,x.name);td(tr,x.nick);td(tr,TYPES[x.type]||"");td(tr,x.dept);
+      td(tr,x.signed===false?"ไม่ได้เซ็น":"เซ็นชื่อแล้ว");td(tr,x.signed===false?"":fmtT(x.at));td(tr,x.remark);dt.appendChild(tr)});
+    if(!list.length)empty(dt,9,"ยังไม่มีบันทึกในช่วงที่เลือก");
+    $("lmsg").textContent="รวม "+list.length+" รายการ ใน "+keys.length+" วัน"+(list.length>500?" (แสดง 500 รายการแรก)":"");
+  }
+  $("lfrom").onchange=loadLog;$("lto").onchange=renderLog;$("ltype").onchange=renderLog;$("ldept").onchange=renderLog;$("lq").oninput=renderLog;
+  function renderAll(){renderReg();renderMT();renderLog()}
+
+  /* ---------- start ---------- */
+  function init(){
+    renderAll();
+    if(!window.supabase||!window.supabase.createClient){$("conn").textContent="โหลด supabase-js ไม่สำเร็จ";say("ตรวจการเชื่อมต่ออินเทอร์เน็ต หรือการบล็อก cdn.jsdelivr.net");return}
+    sb=window.supabase.createClient(C.SUPABASE_URL,C.SUPABASE_ANON_KEY);
+    refreshAll();
+    try{
+      sb.channel("morning-talk-live")
+        .on("postgres_changes",{event:"*",schema:"public",table:C.TABLE_STAFF},loadStaff)
+        .on("postgres_changes",{event:"*",schema:"public",table:C.TABLE_ATTENDANCE},()=>{loadDay();loadLog()})
+        .subscribe();
+    }catch(e){}
+    setInterval(refreshAll,30000);
+  }
+  init();
+})();
+</script>
+</body>
+</html>
